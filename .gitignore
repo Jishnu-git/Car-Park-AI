@@ -1,3 +1,12 @@
 .vscode
 NN/a.exe
 NN/Main.exe
+TCP_IP/CPP/NNSocket.exe
+TCP_IP/CPP/NNSocket.obj
+TCP_IP/CPP/NNSocketSrc.exe
+TCP_IP/CPP/NNSocketSrc.obj
+TCP_IP/CSTCP/bin/*
+TCP_IP/CSTCP/obj/*
+TCP_IP/CSTCP/CSTCP.csproj
+omnisharp.json
+
