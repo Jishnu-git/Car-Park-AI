@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 #include <vector>
 #include <unordered_map>
 #include <random>
@@ -56,12 +57,13 @@ namespace NN {
         std::vector<Node*> inputNodes;
         std::vector<Node*> outputNodes;
         std::vector<Node*> hiddenNodes;
+        std::vector<int> dims;
         std::unordered_map<int, std::vector<int>> mapping;
         std::function<float (float)> activation; 
 
     public:
         NeuralNetwork(std::vector<int> dims, std::function<float (float)> activation);
-        NeuralNetwork(NeuralNetwork&);
+        // NeuralNetwork(const NeuralNetwork&);
         ~NeuralNetwork();
 
         const std::vector<Node>& getAllNodes();
@@ -69,7 +71,9 @@ namespace NN {
         const std::vector<Node*>& getHiddenNodes();
         const std::vector<Node*>& getOutputNodes();
         std::vector<float> computeOutputs();
+        void setInputs(std::vector<float> newInputs);
         void mutate(float rate);
+        static std::vector<int> getRandomDims(int input, int output, int min, int max);
     };
 }
 
@@ -93,7 +97,7 @@ bool fun (bool (*arg)(char *)) {
     return true;
 }
 
-NeuralNetwork::NeuralNetwork(std::vector<int> dims, std::function<float (float)> activation) : activation(activation) {
+NeuralNetwork::NeuralNetwork(std::vector<int> dims, std::function<float (float)> activation) : dims(dims), activation(activation) {
     if (dims.size() < 3) {
         throw except("Dimension of Neural Network is less than 3.");
     }
@@ -142,22 +146,48 @@ std::vector<float> NeuralNetwork::computeOutputs() {
     }
 
     for (size_t i = 0; i < hiddenNodes.size(); i++) {
-        std::vector<int> inputs(mapping[i].size());
-        for (size_t j = 0; j < mapping[i].size(); j++) {
+        std::vector<float> inputs(mapping[i + dims[0]].size());
+        for (auto j : mapping[i + dims[0]]) {
             inputs[j] = allNodes[j].output;
         }
-        hiddenNodes[i] -> computeOutput();
+        allNodes[i + dims[0]].setInputs(inputs);
+        allNodes[i + dims[0]].computeOutput();
     }
 
     std::vector<float> output;
     for (size_t i = 0; i < outputNodes.size(); i++) {
-        outputNodes[i] -> output = activation(outputNodes[i] -> computeOutput());
-        output.push_back(outputNodes[i] -> output);
+        std::vector<float> inputs(mapping[i + dims[0] + dims[1]].size());
+        for (auto j : mapping[i + dims[0]]) {
+            inputs[j] = allNodes[j].output;
+        }
+        allNodes[i + dims[0] + dims[1]].setInputs(inputs);
+        allNodes[i + dims[0] + dims[1]].output = activation(allNodes[i + dims[0] + dims[1]].computeOutput());
+        output.push_back(allNodes[i + dims[0] + dims[1]].output);
     }
 
     return output;
 }
 
+void NeuralNetwork::setInputs(std::vector<float> newInputs) {
+    if (inputNodes.size() != newInputs.size()) {
+        throw except("Input vector dimension does not match the dimensions of neural network");
+        return;
+    }
+    for (size_t i = 0; i < inputNodes.size(); i++) {
+        allNodes[i].setInputs(std::vector<float>{newInputs[i]});
+    }
+}
+
+std::vector<int> NeuralNetwork::getRandomDims(int input, int output, int min = 3, int max = 5) {
+    int size = static_cast<int>(round(NN::random(3, 5)));
+    std::vector<int> dims(size);
+    dims[0] = 3;
+    dims[size - 1] = 1;
+    for (size_t i = 1; i < size - 1; i++) {
+        dims[i] = static_cast<int>(round(NN::random(3, 7)));
+    }
+    return dims;
+}
 
 
 const std::vector<Node>& NeuralNetwork::getAllNodes() {

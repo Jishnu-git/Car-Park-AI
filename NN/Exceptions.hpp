@@ -14,9 +14,9 @@ public:
         return reason;
     }
     std::string where() {
-        return "File: " + file + "\nLine: " + std::to_string(line);
+        return "\nFile: " + file + "\nLine: " + std::to_string(line);
     }    
     std::string describe() {
-        return "Reason: " + what() + "\n" + where(); 
+        return "\nReason: " + what() + "\n" + where(); 
     }
 };
