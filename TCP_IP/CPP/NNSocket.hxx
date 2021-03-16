@@ -9,7 +9,7 @@
 #pragma comment (lib, "Mswsock.lib")
 #pragma comment (lib, "AdvApi32.lib")
 
-using namespace std; 
+
 class NNSocket
 {
 private:
@@ -21,8 +21,8 @@ public:
     NNSocket(/* args */);
     ~NNSocket();
     int initServer();
-    char* recvMessage();
-    bool sendMessage(char * );
+    std::string recvMessage();
+    bool sendMessage(std::string );
     int shutdownServer();
 };
 
@@ -43,7 +43,7 @@ int NNSocket::initServer(){
     //Init winsock
     iResult = WSAStartup(MAKEWORD(2,2),&ws);
     if(iResult != 0){
-        cout<<"Error in Winsock init. Function returned "<<iResult;
+        std::cout<<"Error in Winsock init. Function returned "<<iResult;
         return 0;
     }
 
@@ -53,7 +53,7 @@ int NNSocket::initServer(){
     //Creating Socket
     sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(sock == INVALID_SOCKET){
-        cout<<"Error creating socket... Ending Program, "<<WSAGetLastError();
+        std::cout<<"Error creating socket... Ending Program, "<<WSAGetLastError();
         WSACleanup();
         return 0;
     }
@@ -66,17 +66,17 @@ int NNSocket::initServer(){
 
     iResult = bind(sock,(SOCKADDR*)&s1, sizeof(s1));
     if(iResult != 0){
-        cout<<"Error binding socket... Ending Program, "<<WSAGetLastError()<<endl;
+        std::cout<<"Error binding socket... Ending Program, "<<WSAGetLastError()<<std::endl;
         WSACleanup();
         return 0;
     }
     if(listen(sock,SOMAXCONN) == SOCKET_ERROR){
-        cout<<"Server listen error, "<<WSAGetLastError();
+        std::cout<<"Server listen error, "<<WSAGetLastError();
         closesocket(sock);
         WSACleanup();
         return 0;
     }else{
-        cout<<"Server is listening... ";
+        std::cout<<"Server is listening... ";
     }
     return 0;
 }
@@ -85,12 +85,12 @@ int NNSocket::initServer(){
  * @param returnvar: Contains Message sent by the client. If NULL the client has stopped sending messages or error has occured.
  *  
  */
-char* NNSocket::recvMessage(){
+std::string NNSocket::recvMessage(){
 
     //Client Connection
     client = accept(sock, NULL, NULL);
     if(client == INVALID_SOCKET){
-        cout<<"No connection accepted, "<<WSAGetLastError();
+        std::cout<<"No connection accepted, "<<WSAGetLastError();
         closesocket(sock);
         WSACleanup();
         return 0;
@@ -101,9 +101,9 @@ char* NNSocket::recvMessage(){
 
     iResult = recv(client, recvbuf, recvLength, 0);
     if(iResult > 0){
-        return recvbuf;
-    }else if(iResult <= 0){
-        cout<<"iResult <= 0"<<endl;
+        return std::string(recvbuf);
+    } else {
+        std::cout<<"iResult <= 0"<<std::endl;
         closesocket(client);
         WSACleanup();
         return NULL;
@@ -114,10 +114,10 @@ char* NNSocket::recvMessage(){
  * @param msg: Message to be sent. msg = NULL if no more message is to be sent 
  * @param returnvar: True if sending is successful else false. Check logs for error codes.
  */
-bool NNSocket::sendMessage(char* msg){
-    iResult = send(client, msg, (int)strlen(msg), 0);
+bool NNSocket::sendMessage(std::string msg){
+    iResult = send(client, msg.c_str(), msg.size(), 0);
     if(iResult == SOCKET_ERROR ){
-        cout<<"Sending message failed: "<<iResult;
+        std::cout<<"Sending message failed: "<<iResult;
         closesocket(client);
         WSACleanup();
         return false;
@@ -131,7 +131,7 @@ bool NNSocket::sendMessage(char* msg){
 int NNSocket::shutdownServer(){
     iResult = shutdown(client, SD_SEND);
     if(iResult == SOCKET_ERROR){
-        cout<<"Shutdown Failed, Error: "<<WSAGetLastError();
+        std::cout<<"Shutdown Failed, Error: "<<WSAGetLastError();
         WSACleanup();
         return 0;
     }
