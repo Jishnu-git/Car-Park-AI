@@ -80,7 +80,7 @@ int NNSocket::initServer(){
     }
     client = accept(sock, NULL, NULL);
     if(client == INVALID_SOCKET){
-        cout<<"No connection accepted, "<<WSAGetLastError();
+        std::cout<<"No connection accepted, "<<WSAGetLastError();
         closesocket(sock);
         WSACleanup();
         return 0;
