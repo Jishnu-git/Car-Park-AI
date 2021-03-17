@@ -78,7 +78,6 @@ namespace NN {
 }
 
 namespace NN {
-#define except(message) NNException(__FILE__, __LINE__, message)
 #define MIN -10
 #define MAX 10
 

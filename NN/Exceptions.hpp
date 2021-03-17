@@ -1,6 +1,9 @@
 #include <exception>
 #include <string>
 
+namespace NN {
+#define except(message) NN::NNException(__FILE__, __LINE__, message)
+
 class NNException : public std::exception {
     std::string file;
     int line;
@@ -20,3 +23,4 @@ public:
         return "\nReason: " + what() + "\n" + where(); 
     }
 };
+}
