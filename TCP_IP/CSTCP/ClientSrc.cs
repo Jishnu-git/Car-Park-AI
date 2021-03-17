@@ -5,8 +5,11 @@ namespace CSTCP
     public class ClientSrc {
         public static void Main(){
             Client.CreateConnection();
-            Client.SendMessage("Hello World");
-            Console.WriteLine(Client.RecvMessage());
+            while(true){
+                Client.SendMessage("Hello World");
+                Console.WriteLine(Client.RecvMessage());
+            }
+
         }
     }
 }

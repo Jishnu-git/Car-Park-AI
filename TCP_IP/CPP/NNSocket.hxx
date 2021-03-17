@@ -78,6 +78,13 @@ int NNSocket::initServer(){
     }else{
         std::cout<<"Server is listening... ";
     }
+    client = accept(sock, NULL, NULL);
+    if(client == INVALID_SOCKET){
+        cout<<"No connection accepted, "<<WSAGetLastError();
+        closesocket(sock);
+        WSACleanup();
+        return 0;
+    }
     return 0;
 }
 /**
@@ -88,14 +95,6 @@ int NNSocket::initServer(){
 std::string NNSocket::recvMessage(){
 
     //Client Connection
-    client = accept(sock, NULL, NULL);
-    if(client == INVALID_SOCKET){
-        std::cout<<"No connection accepted, "<<WSAGetLastError();
-        closesocket(sock);
-        WSACleanup();
-        return 0;
-    }
-
     char recvbuf[1024];
     int recvLength = 1024;
 
