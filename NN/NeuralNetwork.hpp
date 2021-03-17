@@ -145,9 +145,9 @@ std::vector<float> NeuralNetwork::computeOutputs() {
     }
 
     for (size_t i = 0; i < hiddenNodes.size(); i++) {
-        std::vector<float> inputs(mapping[i + dims[0]].size());
+        std::vector<float> inputs;
         for (auto j : mapping[i + dims[0]]) {
-            inputs[j] = allNodes[j].output;
+            inputs.push_back(allNodes[j].output);
         }
         allNodes[i + dims[0]].setInputs(inputs);
         allNodes[i + dims[0]].computeOutput();
@@ -155,9 +155,9 @@ std::vector<float> NeuralNetwork::computeOutputs() {
 
     std::vector<float> output;
     for (size_t i = 0; i < outputNodes.size(); i++) {
-        std::vector<float> inputs(mapping[i + dims[0] + dims[1]].size());
+        std::vector<float> inputs;
         for (auto j : mapping[i + dims[0]]) {
-            inputs[j] = allNodes[j].output;
+            inputs.push_back(allNodes[j].output);
         }
         allNodes[i + dims[0] + dims[1]].setInputs(inputs);
         allNodes[i + dims[0] + dims[1]].output = activation(allNodes[i + dims[0] + dims[1]].computeOutput());
