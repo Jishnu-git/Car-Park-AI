@@ -1,8 +1,0 @@
-﻿  Shoe.cpp
-  Source.cpp
-  WishList.cpp
-C:\Users\Admin\source\repos\Source\Native lib\WishList.cpp(26,22): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-  WishListWrapper.cpp
-  Generating Code...
-     Creating library C:\Users\Admin\source\repos\Source\x64\Debug\Native lib.lib and object C:\Users\Admin\source\repos\Source\x64\Debug\Native lib.exp
-  Native lib.vcxproj -> C:\Users\Admin\source\repos\Source\x64\Debug\Native lib.dll
