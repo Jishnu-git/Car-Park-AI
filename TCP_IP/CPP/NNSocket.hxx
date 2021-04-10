@@ -95,12 +95,24 @@ int NNSocket::initServer(){
 std::string NNSocket::recvMessage(){
 
     //Client Connection
-    char recvbuf[1024];
-    int recvLength = 1024;
+    char *recvbuf;
+    int recvLength;
 
-    iResult = recv(client, recvbuf, recvLength, 0);
+    iResult = recv(client, (char *)(&recvLength), sizeof(int), 0);
+    if (iResult <= 0) {
+        std::cout<<"iResult <= 0"<<std::endl;
+        closesocket(client);
+        WSACleanup();
+        return NULL;
+    }
+    
+    sendMessage("ack");
+    recvbuf = new char[recvLength];
+    iResult = recv(client, recvbuf, recvLength + 1, 0);
+    std::string msg(recvbuf);
+    delete[] recvbuf;
     if(iResult > 0){
-        return std::string(recvbuf);
+        return msg;
     } else {
         std::cout<<"iResult <= 0"<<std::endl;
         closesocket(client);
