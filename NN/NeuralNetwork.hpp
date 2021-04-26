@@ -35,7 +35,11 @@ namespace NN {
         return std::max(static_cast<float>(0), x);
     }
 
+    float LeakyReLU(float x) {
+        return std::max(static_cast<float>(0.01) * x, x);
+    }
 
+    
 
     //NN
     class Node {
