@@ -63,6 +63,7 @@ namespace NN {
         void setInputs(std::vector<float> newInputs);
         std::vector<float>& getWeights();
         const std::vector<float>& getInputs(); 
+        const std::function<float (float)>& getActivation();
         float computeOutput();
         void mutate(float rate);
     };
@@ -81,6 +82,7 @@ namespace NN {
         const std::vector<Node>& getHiddenNodes();
         const std::vector<Node>& getOutputNodes();
         const std::vector<int>& getDims();
+        const std::unordered_map<int, std::vector<int>>& getMapping();
         std::vector<float> computeOutputs();
         void setInputs(std::vector<float> newInputs);
         void mutate(float rate);
@@ -237,6 +239,10 @@ const std::vector<Node>& NeuralNetwork::getOutputNodes() {
     return std::vector<Node>(allNodes.begin() + dims[1], allNodes.begin() + dims[2]);
 }
 
+const std::unordered_map<int, std::vector<int>>& NeuralNetwork::getMapping() {
+    return mapping;
+}
+
 
 /*=========================================================================
 ====================================Node===================================
@@ -288,6 +294,10 @@ std::vector<float>& Node::getWeights(){
 
 const std::vector<float>& Node::getInputs() {
     return inputs;
+}
+
+const std::function<float (float)>& Node::getActivation(){
+    return activation;
 }
 
 float Node::computeOutput() {
