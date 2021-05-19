@@ -1,6 +1,9 @@
 #include "NN/NeuralNetwork.hpp"
+#include "NN/StoreNN.hpp"
 #include "TCP_IP/CPP/NNSocket.hxx"
 #include "json.hpp"
+#include <ctime>
+#include <iomanip>
 
 static float goalX;
 static float goalZ;
@@ -160,15 +163,75 @@ public:
         }
         return output;
     }
+
+    static void populateFromNN(std::vector<Car> &Cars, NN::NeuralNetwork parentA, NN::NeuralNetwork parentB, int size) {
+        std::vector<NN::NeuralNetwork> newdriversA = NN::NeuralNetwork::mutateFromNN(parentA, ceil(size * 0.75), 0.15);
+        std::vector<NN::NeuralNetwork> newdriversB = NN::NeuralNetwork::mutateFromNN(parentB, floor(size * 0.25), 0.20);
+
+        Cars.clear();
+        for (int i = 0; i < newdriversA.size(); i++) {
+            Cars.push_back(Car(newdriversA[i]));
+        }
+        for (int i = 0; i < newdriversB.size(); i++) {
+            Cars.push_back(Car(newdriversB[i]));
+    }
+}
 };
 
+
+
 //g++ Car.cpp -w -lws2_32 -lmswsock -ladvapi32
-int main(void) {
+int main(int argc, char* argv[]) {
     NNSocket socket;
     int numCars = 50, gen = 1, prevScore = -1;
     std::vector<Car> Cars(numCars);
-    Car prevParent;
+    Car prevParent, parentA, parentB;
+
+    std::string inp = "./Models/";
+    std::string op = "./Models/";
+    auto now = std::time(nullptr);
+    std::stringstream ts;
+    ts << std::put_time(std::gmtime(&now), "%e_%m_");
     try {
+        argc--;
+        for (int i = 1; i < argc + 1; i++) {
+            std::cout << argv[i] << std::endl;
+        }
+        std::cout << std::endl;
+        if (argc != 0) {
+            if (argc == 1) {
+                inp += argv[1];
+                op += ts.str();
+            } else if (argc == 2 || argc == 4) {
+                for (int i = 1; i < argc + 1; i += 2) {
+                    if (!strcmp(argv[i], "-l")) {
+                        inp += argv[i + 1];
+                    } else if (!strcmp(argv[i], "-s")) {
+                        op += argv[i + 1];
+                    } else {
+                        std::cerr << "1 Invalid argument specified!" << argv[i] << " " << argv[i + 1];
+                        return -1;
+                    }
+                }
+            } else {
+                std::cerr << "2 Invalid arguments specified!";
+                return -1;
+            }
+        } else {
+            op += ts.str();
+        }
+
+        if (inp != "./Models/") {
+            NN::StoreData modelData(inp);
+            std::vector<NN::NeuralNetwork> savedModels = modelData.readData();
+            if (savedModels.size() != 2) {
+                std::cerr << "Invalid number of models in a single file!";
+                return -1;
+            }
+            Car::populateFromNN(Cars, savedModels[0], savedModels[1], numCars);
+        }
+        NN::StoreData modelOutput(op);
+
         std::cout << "Initializing server...";
         socket.initServer();
         std::cout << "Done!\nWaiting for message...\n\n";
@@ -179,6 +242,14 @@ int main(void) {
             if (detailsJSON == "close") {
                 break;
             }
+
+            if (detailsJSON == "save") {
+                modelOutput.writeData(parentA.getNeuralNetwork(), true);
+                modelOutput.writeData(parentB.getNeuralNetwork());
+                std::cout << "Saved the current model as " + op << "\nExiting...";
+                break;
+            }
+
             std::vector<Details> details = Details::fromJSON(detailsJSON);
             if (Cars.size() != details.size()) {
                 std::cout << Cars.size() << " " << details.size() << std::endl;
@@ -202,23 +273,15 @@ int main(void) {
             }
             if (deadCars == numCars) {
                 gen++;
-                Car parentA = Cars[maxInd];
-                Car parentB = prevParent; 
+                parentA = Cars[maxInd];
+                parentB = prevParent; 
                 if (prevScore > parentA.getDetails().score) {
                     parentA = prevParent;
                     parentB = Cars[maxInd];
                 }
 
-                std::vector<NN::NeuralNetwork> newdriversA = NN::NeuralNetwork::mutateFromNN(parentA.getNeuralNetwork(), ceil(numCars * 0.75), 0.15);
-                std::vector<NN::NeuralNetwork> newdriversB = NN::NeuralNetwork::mutateFromNN(parentB.getNeuralNetwork(), floor(numCars * 0.25), 0.20);
-
-                Cars.clear();
-                for (int i = 0; i < newdriversA.size(); i++) {
-                    Cars.push_back(Car(newdriversA[i]));
-                }
-                for (int i = 0; i < newdriversB.size(); i++) {
-                    Cars.push_back(Car(newdriversB[i]));
-                }
+                Car::populateFromNN(Cars, parentA.getNeuralNetwork(), parentB.getNeuralNetwork(), numCars);
+                                
                 std::cout << "mutating, generation#: " << gen << " scores: " << parentA.getDetails().score << ", " << parentB.getDetails().score << " OP: " << parentA.computeOutput() << std::endl;
                 prevScore = parentA.getDetails().score;
                 prevParent = parentA;   

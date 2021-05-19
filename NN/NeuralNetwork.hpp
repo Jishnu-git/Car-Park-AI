@@ -73,13 +73,14 @@ namespace NN {
         std::unordered_map<int, std::vector<int>> mapping;
     public:
         NeuralNetwork(std::vector<int> dims, std::vector<std::function<float (float)>> activation);
-        NeuralNetwork(const NeuralNetwork&);
+        //NeuralNetwork(const NeuralNetwork&);
         ~NeuralNetwork();
 
         const std::vector<Node>& getAllNodes();
         const std::vector<Node>& getInputNodes();
         const std::vector<Node>& getHiddenNodes();
         const std::vector<Node>& getOutputNodes();
+        const std::vector<int>& getDims();
         std::vector<float> computeOutputs();
         void setInputs(std::vector<float> newInputs);
         void mutate(float rate);
@@ -133,11 +134,11 @@ NeuralNetwork::NeuralNetwork(std::vector<int> dims, std::vector<std::function<fl
     }
 }
 
-NeuralNetwork::NeuralNetwork(const NeuralNetwork& nn) {
-    dims = nn.dims;
-    allNodes = nn.allNodes;
-    mapping = nn.mapping;
-}
+// NeuralNetwork::NeuralNetwork(const NeuralNetwork& nn) {
+//     dims = nn.dims;
+//     allNodes = nn.allNodes;
+//     mapping = nn.mapping;
+// }
 
 NeuralNetwork::~NeuralNetwork() {
     allNodes.clear();
@@ -215,6 +216,10 @@ std::vector<NeuralNetwork> NeuralNetwork::mutateFromNN(const NeuralNetwork& nn, 
     return nextGen;
 }
 
+
+const std::vector<int>& NeuralNetwork::getDims() {
+    return dims;
+}
 
 const std::vector<Node>& NeuralNetwork::getAllNodes() {
     return allNodes;
